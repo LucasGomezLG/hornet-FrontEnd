@@ -72,6 +72,7 @@ export function AuthProvider({ children }) {
     })
     if (!res.ok) throw new Error('Login fallido')
     const data = await res.json()
+    localStorage.setItem('hi_session', '1')
     applyToken(data.accessToken)
     return decodeJWT(data.accessToken)
   }, [applyToken])
@@ -86,6 +87,7 @@ export function AuthProvider({ children }) {
     } catch {
       // best-effort
     }
+    localStorage.removeItem('hi_session')
     applyToken(null)
   }, [applyToken])
 
@@ -93,10 +95,14 @@ export function AuthProvider({ children }) {
   useEffect(() => { _refreshFn = refreshSession }, [refreshSession])
   useEffect(() => { _logoutFn = logout }, [logout])
 
-  // Restaurar sesión desde cookie de refresh al montar
+  // Restaurar sesión desde cookie de refresh al montar — solo si hay sesión previa
   useEffect(() => {
+    if (!localStorage.getItem('hi_session')) {
+      setLoading(false)
+      return
+    }
     refreshSession()
-      .catch(() => {})
+      .catch(() => localStorage.removeItem('hi_session'))
       .finally(() => setLoading(false))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

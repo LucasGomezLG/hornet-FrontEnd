@@ -159,45 +159,79 @@ export default function Header() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-hornet-dark border-t border-neutral-800 px-4 pb-4 space-y-1">
-          {NAV_LINKS.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              label={label}
-              active={location.pathname.startsWith(to)}
-              onClick={() => setMobileOpen(false)}
-            />
-          ))}
-          <div className="pt-3 border-t border-neutral-800 mt-2">
+        <div
+          className="md:hidden bg-hornet-dark border-t border-neutral-800"
+          style={{ animation: 'menu-slide-down 0.2s ease' }}
+        >
+          {/* Nav principal */}
+          <nav className="px-2 pt-2 pb-1">
+            {NAV_LINKS.map(({ to, label }) => {
+              const active = location.pathname.startsWith(to)
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    'flex items-center justify-between px-3 py-3.5 border-b border-neutral-800 text-sm font-medium transition-colors',
+                    active ? 'text-hornet-gold' : 'text-white/90 hover:text-white'
+                  )}
+                >
+                  {label}
+                  {active && <span className="w-1.5 h-1.5 rounded-full bg-hornet-gold" />}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* Sección usuario */}
+          <div className="px-2 pt-1 pb-4">
             {user ? (
-              <div className="space-y-1">
-                <p className="text-hornet-muted text-xs mb-2">{user.nombre || user.email}</p>
+              <>
+                {/* Avatar + nombre */}
+                <div className="flex items-center gap-3 px-3 py-3 mb-1">
+                  <span className="w-9 h-9 rounded-full bg-hornet-gold text-hornet-dark flex items-center justify-center text-sm font-black shrink-0">
+                    {(user.nombre || user.email).charAt(0).toUpperCase()}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{user.nombre || user.email}</p>
+                    <p className="text-hornet-muted text-xs capitalize">{user.tipo}</p>
+                  </div>
+                </div>
+
+                {/* Links de cuenta */}
                 {user.tipo === 'admin' && (
-                  <MobileLink to="/admin" onClick={() => setMobileOpen(false)} label="Panel admin" />
+                  <MobileLink to="/admin" onClick={() => setMobileOpen(false)} label="Panel admin" icon="⚙️" />
                 )}
-                <MobileLink to="/dashboard"    onClick={() => setMobileOpen(false)} label="Dashboard" />
-                <MobileLink to="/pedidos"      onClick={() => setMobileOpen(false)} label="Mis pedidos" />
-                <MobileLink to="/cotizaciones" onClick={() => setMobileOpen(false)} label="Mis cotizaciones" />
-                <MobileLink to="/perfil"       onClick={() => setMobileOpen(false)} label="Perfil" />
+                <MobileLink to="/dashboard"    onClick={() => setMobileOpen(false)} label="Mi dashboard"      icon="📊" />
+                <MobileLink to="/pedidos"      onClick={() => setMobileOpen(false)} label="Mis pedidos"        icon="📦" />
+                <MobileLink to="/cotizaciones" onClick={() => setMobileOpen(false)} label="Mis cotizaciones"   icon="🧾" />
+                <MobileLink to="/perfil"       onClick={() => setMobileOpen(false)} label="Mi perfil"          icon="👤" />
                 {user.tipo === 'vendedor' && (
-                  <MobileLink to="/vendedor/productos" onClick={() => setMobileOpen(false)} label="Mis productos" />
+                  <MobileLink to="/vendedor/productos" onClick={() => setMobileOpen(false)} label="Mis productos" icon="🏪" />
                 )}
+
+                {/* Cerrar sesión */}
                 <button
                   onClick={() => { setMobileOpen(false); handleLogout() }}
-                  className="block text-hornet-error text-sm font-medium mt-2"
+                  className="flex items-center gap-3 w-full px-3 py-3.5 mt-1 border-t border-neutral-800 text-hornet-error text-sm font-medium hover:bg-red-950/30 transition-colors"
                 >
-                  Salir
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Cerrar sesión
                 </button>
-              </div>
+              </>
             ) : (
-              <Link
-                to="/login"
-                onClick={() => setMobileOpen(false)}
-                className="block bg-hornet-gold text-hornet-dark text-sm font-black px-4 py-2 text-center"
-              >
-                Ingresar
-              </Link>
+              <div className="px-2 pt-2">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center bg-hornet-gold text-hornet-dark text-sm font-black py-3.5"
+                >
+                  Ingresar
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -206,13 +240,14 @@ export default function Header() {
   )
 }
 
-function MobileLink({ to, label, onClick }) {
+function MobileLink({ to, label, icon, onClick }) {
   return (
     <Link
       to={to}
       onClick={onClick}
-      className="block text-white text-sm font-medium py-1 hover:text-hornet-gold transition-colors"
+      className="flex items-center gap-3 px-3 py-3 text-white/80 hover:text-white hover:bg-white/5 transition-colors text-sm"
     >
+      {icon && <span className="text-base w-5 text-center">{icon}</span>}
       {label}
     </Link>
   )

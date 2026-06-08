@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router'
+import { useNavigate, useLocation, Link } from 'react-router'
 import { GoogleLogin } from '@react-oauth/google'
 import { useAuth } from '../../hooks/useAuth'
 import { reclamarCotizacion } from '../../api/auth'
@@ -70,13 +70,13 @@ export default function LoginPage() {
 
           <p className="text-xs text-hornet-muted text-center mt-6 leading-relaxed">
             Al ingresar aceptás nuestros{' '}
-            <a href="/terminos" className="underline hover:text-hornet-dark">
+            <Link to="/terminos" className="underline hover:text-hornet-dark">
               Términos y condiciones
-            </a>{' '}
+            </Link>{' '}
             y{' '}
-            <a href="/privacidad" className="underline hover:text-hornet-dark">
+            <Link to="/privacidad" className="underline hover:text-hornet-dark">
               Política de privacidad
-            </a>.
+            </Link>.
           </p>
         </div>
 

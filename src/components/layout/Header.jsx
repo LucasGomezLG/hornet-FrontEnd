@@ -107,6 +107,7 @@ export default function Header() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
+            <img src="/logo.png" alt="Hornet Imports" className="h-8 w-auto" />
             <span className="text-hornet-gold font-black text-xl tracking-tight">HORNET</span>
             <span className="text-white font-medium text-xl tracking-tight">IMPORTS</span>
           </Link>

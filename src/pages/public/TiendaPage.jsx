@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router'
 import { getProductos } from '../../api/tienda'
 import ProductCard from '../../components/tienda/ProductCard'
 import { CATEGORIAS } from '../../lib/categorias'
-import { PageSpinner } from '../../components/ui/LoadingSpinner'
+import { ProductGridSkeleton } from '../../components/ui/Skeleton'
 
 const CATEGORIAS_TIENDA = CATEGORIAS.filter(c => !c.blacklist)
 
@@ -79,7 +79,7 @@ export default function TiendaPage() {
       </div>
 
       {loading ? (
-        <PageSpinner />
+        <ProductGridSkeleton count={24} />
       ) : productos.length === 0 ? (
         <div className="text-center py-16 text-hornet-muted">
           <p className="text-4xl mb-3">📦</p>

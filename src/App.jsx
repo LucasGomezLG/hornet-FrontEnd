@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { ToastProvider } from './context/ToastContext.jsx'
 import MainLayout from './components/layout/MainLayout.jsx'
 import ProtectedRoute from './router/ProtectedRoute.jsx'
 import AdminRoute from './router/AdminRoute.jsx'
@@ -49,6 +50,7 @@ import NotFoundPage from './pages/NotFoundPage.jsx'
 
 export default function App() {
   return (
+    <ToastProvider>
     <AuthProvider>
       <Routes>
         {/* Todas las rutas con Header + Footer */}
@@ -99,5 +101,6 @@ export default function App() {
         </Route>
       </Routes>
     </AuthProvider>
+    </ToastProvider>
   )
 }

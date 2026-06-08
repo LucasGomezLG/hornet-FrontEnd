@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router'
 import { getListings } from '../../api/marketplace'
 import ListingCard from '../../components/marketplace/ListingCard'
 import { CATEGORIAS } from '../../lib/categorias'
-import { PageSpinner } from '../../components/ui/LoadingSpinner'
+import { ProductGridSkeleton } from '../../components/ui/Skeleton'
 
 export default function MarketplacePage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -79,7 +79,7 @@ export default function MarketplacePage() {
       </div>
 
       {loading ? (
-        <PageSpinner />
+        <ProductGridSkeleton count={24} />
       ) : listings.length === 0 ? (
         <div className="text-center py-16 text-hornet-muted">
           <p className="text-4xl mb-3">🛒</p>

@@ -1,6 +1,9 @@
 import { Link } from 'react-router'
 import Button from '../../components/ui/Button'
 import HeroCarousel from '../../components/home/HeroCarousel'
+import StatsSection from '../../components/home/StatsSection'
+import FeaturedProducts from '../../components/home/FeaturedProducts'
+import FadeIn from '../../components/ui/FadeIn'
 
 const PASOS = [
   { n: '01', titulo: 'Cotizás', desc: 'Pegás el link del producto, ponés precio y peso. El total con impuestos aparece al instante.' },
@@ -23,36 +26,52 @@ export default function HomePage() {
       {/* Hero carousel */}
       <HeroCarousel />
 
+      {/* Stats animados */}
+      <StatsSection />
+
       {/* Cómo funciona — 3 pasos */}
       <section className="max-w-5xl mx-auto px-4 py-16">
-        <h2 className="text-2xl font-black text-hornet-dark text-center mb-10">Tres pasos, sin burocracia</h2>
+        <FadeIn>
+          <h2 className="text-2xl font-black text-hornet-dark text-center mb-10">Tres pasos, sin burocracia</h2>
+        </FadeIn>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PASOS.map(p => (
-            <div key={p.n} className="border border-neutral-200 p-6">
-              <p className="text-3xl font-black text-hornet-gold mb-3">{p.n}</p>
-              <h3 className="text-lg font-black text-hornet-dark mb-2">{p.titulo}</h3>
-              <p className="text-sm text-hornet-muted leading-relaxed">{p.desc}</p>
-            </div>
+          {PASOS.map((p, i) => (
+            <FadeIn key={p.n} delay={i * 100}>
+              <div className="border border-neutral-200 p-6 h-full">
+                <p className="text-3xl font-black text-hornet-gold mb-3">{p.n}</p>
+                <h3 className="text-lg font-black text-hornet-dark mb-2">{p.titulo}</h3>
+                <p className="text-sm text-hornet-muted leading-relaxed">{p.desc}</p>
+              </div>
+            </FadeIn>
           ))}
         </div>
-        <div className="text-center mt-8">
+        <FadeIn delay={300} className="text-center mt-8">
           <Link to="/como-funciona" className="text-sm font-black text-hornet-dark underline">
             Ver proceso completo →
           </Link>
-        </div>
+        </FadeIn>
       </section>
 
+      {/* Productos destacados de la tienda */}
+      <div className="bg-hornet-surface py-2">
+        <FeaturedProducts />
+      </div>
+
       {/* Orígenes soportados */}
-      <section className="bg-hornet-surface py-14 px-4">
+      <section className="bg-white py-14 px-4">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-black text-hornet-dark text-center mb-2">Importamos desde cualquier tienda</h2>
-          <p className="text-center text-hornet-muted text-sm mb-8">Si tiene envío internacional, lo traemos.</p>
+          <FadeIn>
+            <h2 className="text-2xl font-black text-hornet-dark text-center mb-2">Importamos desde cualquier tienda</h2>
+            <p className="text-center text-hornet-muted text-sm mb-8">Si tiene envío internacional, lo traemos.</p>
+          </FadeIn>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {ORIGENES.map(o => (
-              <div key={o.label} className="border border-neutral-200 bg-white p-4 text-center">
-                <p className="font-black text-hornet-dark text-sm">{o.label}</p>
-                <p className="text-xs text-hornet-muted mt-0.5">{o.sub}</p>
-              </div>
+            {ORIGENES.map((o, i) => (
+              <FadeIn key={o.label} delay={i * 60}>
+                <div className="border border-neutral-200 bg-hornet-surface p-4 text-center h-full">
+                  <p className="font-black text-hornet-dark text-sm">{o.label}</p>
+                  <p className="text-xs text-hornet-muted mt-0.5">{o.sub}</p>
+                </div>
+              </FadeIn>
             ))}
           </div>
         </div>
@@ -60,43 +79,31 @@ export default function HomePage() {
 
       {/* Servicios */}
       <section className="max-w-5xl mx-auto px-4 py-16">
-        <h2 className="text-2xl font-black text-hornet-dark text-center mb-10">Todo bajo un mismo techo</h2>
+        <FadeIn>
+          <h2 className="text-2xl font-black text-hornet-dark text-center mb-10">Todo bajo un mismo techo</h2>
+        </FadeIn>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="border border-neutral-200 p-6">
-            <p className="text-2xl mb-3">🛒</p>
-            <h3 className="font-black text-hornet-dark mb-2">Importación a pedido</h3>
-            <p className="text-sm text-hornet-muted mb-4">
-              Traemos cualquier producto desde el exterior. Cotizá y solicitá en minutos.
-            </p>
-            <Link to="/cotizar" className="text-sm font-black text-hornet-dark underline">
-              Cotizar →
-            </Link>
-          </div>
-          <div className="border border-neutral-200 p-6">
-            <p className="text-2xl mb-3">📦</p>
-            <h3 className="font-black text-hornet-dark mb-2">Tienda</h3>
-            <p className="text-sm text-hornet-muted mb-4">
-              Productos ya importados, disponibles en stock en Argentina para entrega rápida.
-            </p>
-            <Link to="/tienda" className="text-sm font-black text-hornet-dark underline">
-              Ver tienda →
-            </Link>
-          </div>
-          <div className="border border-neutral-200 p-6">
-            <p className="text-2xl mb-3">🏪</p>
-            <h3 className="font-black text-hornet-dark mb-2">Marketplace</h3>
-            <p className="text-sm text-hornet-muted mb-4">
-              Comprá a vendedores independientes verificados que publican sus productos.
-            </p>
-            <Link to="/marketplace" className="text-sm font-black text-hornet-dark underline">
-              Ver marketplace →
-            </Link>
-          </div>
+          {[
+            { icon: '🛒', titulo: 'Importación a pedido', desc: 'Traemos cualquier producto desde el exterior. Cotizá y solicitá en minutos.', to: '/cotizar', cta: 'Cotizar →' },
+            { icon: '📦', titulo: 'Tienda',               desc: 'Productos ya importados, disponibles en stock en Argentina para entrega rápida.',   to: '/tienda',    cta: 'Ver tienda →' },
+            { icon: '🏪', titulo: 'Marketplace',          desc: 'Comprá a vendedores independientes verificados que publican sus productos.',          to: '/marketplace', cta: 'Ver marketplace →' },
+          ].map((s, i) => (
+            <FadeIn key={s.titulo} delay={i * 100}>
+              <div className="border border-neutral-200 p-6 h-full flex flex-col">
+                <p className="text-2xl mb-3">{s.icon}</p>
+                <h3 className="font-black text-hornet-dark mb-2">{s.titulo}</h3>
+                <p className="text-sm text-hornet-muted mb-4 flex-1">{s.desc}</p>
+                <Link to={s.to} className="text-sm font-black text-hornet-dark underline">
+                  {s.cta}
+                </Link>
+              </div>
+            </FadeIn>
+          ))}
         </div>
       </section>
 
       {/* Mayorista banner */}
-      <section className="bg-hornet-gold px-4 py-12">
+      <FadeIn as="section" className="bg-hornet-gold px-4 py-12">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
             <h2 className="text-2xl font-black text-hornet-dark">¿Importás para tu negocio?</h2>
@@ -108,10 +115,10 @@ export default function HomePage() {
             <Button variant="secondary" size="lg">Ver planes mayorista →</Button>
           </Link>
         </div>
-      </section>
+      </FadeIn>
 
       {/* CTA Final */}
-      <section className="bg-hornet-dark text-white px-4 py-16 text-center">
+      <FadeIn as="section" className="bg-hornet-dark text-white px-4 py-16 text-center">
         <h2 className="text-3xl font-black mb-3">Empezá hoy, es gratis cotizar</h2>
         <p className="text-white/70 text-sm mb-8 max-w-md mx-auto">
           Sin registro, sin obligaciones. Calculá cuánto cuesta importar tu producto en menos de 30 segundos.
@@ -119,7 +126,7 @@ export default function HomePage() {
         <Link to="/cotizar">
           <Button variant="primary" size="lg">Ir al cotizador →</Button>
         </Link>
-      </section>
+      </FadeIn>
     </div>
   )
 }

@@ -9,12 +9,6 @@ import { PageSpinner } from '../../components/ui/LoadingSpinner'
 
 const METODOS = [
   {
-    id: 'mp',
-    label: 'MercadoPago',
-    desc: 'Tarjeta de débito, crédito o saldo en MP. Procesamiento inmediato.',
-    icon: '💳',
-  },
-  {
     id: 'transferencia',
     label: 'Transferencia bancaria',
     desc: 'Transferencia en ARS. Validación en 1-24 horas hábiles.',
@@ -101,7 +95,7 @@ export default function SolicitarPage() {
 
   const [cotizacion, setCotizacion] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [metodo, setMetodo] = useState('mp')
+  const [metodo, setMetodo] = useState('transferencia')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [resultado, setResultado] = useState(null)
@@ -118,13 +112,7 @@ export default function SolicitarPage() {
     setError(null)
     try {
       const r = await confirmarPedido({ cotizacionId, metodoPago: metodo })
-      const data = r.data
-
-      if (metodo === 'mp' && data.mpInitPoint) {
-        window.location.href = data.mpInitPoint
-        return
-      }
-      setResultado(data)
+      setResultado(r.data)
     } catch (e) {
       const msg = e.response?.data?.message
       setError(msg || 'Hubo un error al procesar el pedido. Intentá de nuevo.')
@@ -269,7 +257,7 @@ export default function SolicitarPage() {
 
           <Button variant="primary" size="lg" className="w-full"
             onClick={handleConfirmar} loading={submitting}>
-            {metodo === 'mp' ? 'Ir a pagar con MercadoPago →' : 'Confirmar pedido →'}
+            Confirmar pedido →
           </Button>
 
           <p className="text-xs text-hornet-muted text-center mt-3">

@@ -2,6 +2,8 @@ import { createContext, useState, useEffect, useCallback } from 'react'
 
 export const AuthContext = createContext(null)
 
+const API = import.meta.env.VITE_API_BASE_URL || ''
+
 // Module-level refs — el interceptor de axios los necesita fuera del ciclo de React
 let _accessToken = null
 let _refreshFn = null
@@ -38,7 +40,7 @@ export function AuthProvider({ children }) {
       // Poblar con lo que hay en el JWT; nombre se carga aparte via /api/perfil
       setUser({ id: payload.sub, email: payload.email, tipo: payload.tipo, nombre: null })
       // Fetch del nombre en background — no bloquea el render
-      fetch('/api/perfil', {
+      fetch(`${API}/api/perfil`, {
         credentials: 'include',
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -49,7 +51,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   const refreshSession = useCallback(async () => {
-    const res = await fetch('/api/auth/refresh', {
+    const res = await fetch(`${API}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     })
@@ -62,7 +64,7 @@ export function AuthProvider({ children }) {
   }, [applyToken])
 
   const loginWithGoogle = useCallback(async (idToken) => {
-    const res = await fetch('/api/auth/google', {
+    const res = await fetch(`${API}/api/auth/google`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -76,7 +78,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
-      await fetch('/api/auth/logout', {
+      await fetch(`${API}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
         headers: _accessToken ? { Authorization: `Bearer ${_accessToken}` } : {},

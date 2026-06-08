@@ -25,6 +25,11 @@
   --radius-lg: 6px;
 }
 
+@keyframes carousel-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
 /* Reset base */
 *, *::before, *::after {
   box-sizing: border-box;

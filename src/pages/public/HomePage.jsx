@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import Button from '../../components/ui/Button'
+import HeroCarousel from '../../components/home/HeroCarousel'
 
 const PASOS = [
   { n: '01', titulo: 'Cotizás', desc: 'Pegás el link del producto, ponés precio y peso. El total con impuestos aparece al instante.' },
@@ -19,29 +20,8 @@ const ORIGENES = [
 export default function HomePage() {
   return (
     <div>
-      {/* Hero */}
-      <section className="bg-hornet-dark text-white px-4 py-20">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-hornet-gold text-xs font-black uppercase tracking-widest mb-4">
-            Importación desde cualquier parte del mundo
-          </p>
-          <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-5">
-            Sabé exactamente cuánto<br />cuesta importar antes de pagar
-          </h1>
-          <p className="text-white/70 text-lg max-w-xl mx-auto mb-8">
-            Cotizador instantáneo con aranceles, IVA y flete incluidos.
-            Importación particular y mayorista, sin sorpresas.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/cotizar">
-              <Button variant="primary" size="lg">Cotizar gratis →</Button>
-            </Link>
-            <Link to="/como-funciona">
-              <Button variant="secondary" size="lg">¿Cómo funciona?</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Hero carousel */}
+      <HeroCarousel />
 
       {/* Cómo funciona — 3 pasos */}
       <section className="max-w-5xl mx-auto px-4 py-16">

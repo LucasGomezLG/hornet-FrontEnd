@@ -17,7 +17,7 @@ export default function ImageUploader({ getFirma, onUploaded, currentUrl }) {
       form.append('file', file)
       form.append('api_key', firma.apiKey)
       form.append('timestamp', firma.timestamp)
-      form.append('signature', firma.firma)
+      form.append('signature', firma.signature)
       form.append('folder', firma.folder)
 
       const res = await axios.post(

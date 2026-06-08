@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 const SLIDES = [
   {
     id: 1,
-    image: null,
+    image: '/Imagen1.jpg',
     gradient: 'linear-gradient(135deg, #111111 0%, #1a1a1a 50%, #0d0d0d 100%)',
     eyebrow: 'Importación a pedido',
     title: 'Sabé exactamente cuánto\ncuesta importar',
@@ -15,7 +15,7 @@ const SLIDES = [
   },
   {
     id: 2,
-    image: null,
+    image: '/Imagen2.jpg',
     gradient: 'linear-gradient(135deg, #18181b 0%, #27272a 50%, #18181b 100%)',
     eyebrow: 'Tienda con stock',
     title: 'Productos importados\nlistos para entrega inmediata',
@@ -26,7 +26,7 @@ const SLIDES = [
   },
   {
     id: 3,
-    image: null,
+    image: '/Imagen3.jpg',
     gradient: 'linear-gradient(135deg, #0d0d0d 0%, #1c1917 50%, #111111 100%)',
     eyebrow: 'Marketplace',
     title: 'Vendedores verificados,\nprecios sin intermediarios',

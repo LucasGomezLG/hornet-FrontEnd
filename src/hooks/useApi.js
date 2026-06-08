@@ -3,7 +3,7 @@ import { getAccessToken, triggerRefresh, triggerLogout } from '../context/AuthCo
 
 // Instancia única — se configura una vez, se reutiliza en toda la app
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: (import.meta.env.VITE_API_BASE_URL || '') + '/api',
   withCredentials: true,
 })
 

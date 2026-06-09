@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react'
 import { getPedidosAdmin, actualizarPedido, confirmarPago } from '../../api/admin'
+import { confirmarSena, notificarLlegada, confirmarSaldo } from '../../api/solicitudes'
 import { formatARS, formatUSD, formatFecha, ESTADO_PEDIDO_LABELS } from '../../lib/utils'
 import StatusChip from '../../components/ui/StatusChip'
 import Button from '../../components/ui/Button'
 import { PageSpinner } from '../../components/ui/LoadingSpinner'
 
-const ESTADOS_PEDIDO = ['', 'en_proceso', 'comprado', 'en_transito', 'en_aduana', 'entregado', 'cancelado']
+const ESTADOS_PEDIDO = [
+  '',
+  'en_proceso', 'comprado',
+  'esperando_sena', 'sena_confirmada',
+  'confirmado_sin_pago',
+  'en_transito', 'en_aduana',
+  'esperando_saldo', 'saldo_confirmado',
+  'esperando_pago', 'pago_confirmado',
+  'entregado', 'cancelado',
+]
 const METODOS = ['', 'mp', 'transferencia', 'cripto']
 
 function EditarModal({ pedido, onClose, onDone }) {
@@ -13,17 +23,35 @@ function EditarModal({ pedido, onClose, onDone }) {
   const [tracking, setTracking] = useState(pedido.trackingCode || '')
   const [referencia, setReferencia] = useState('')
   const [loading, setLoading] = useState(false)
+  const [actionLoading, setActionLoading] = useState(null)
+  const [error, setError] = useState(null)
 
   const handleGuardar = async () => {
     setLoading(true)
+    setError(null)
     try {
       await actualizarPedido(pedido.id, { estado, trackingCode: tracking || null })
-      if (referencia.trim()) {
+      if (referencia.trim() && pedido.estado === 'en_proceso') {
         await confirmarPago(pedido.id, referencia.trim())
       }
       onDone()
+    } catch (e) {
+      setError(e.response?.data?.message || 'Error al guardar.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const runAction = async (key, fn) => {
+    setActionLoading(key)
+    setError(null)
+    try {
+      await fn()
+      onDone()
+    } catch (e) {
+      setError(e.response?.data?.message || `Error al ejecutar acción.`)
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -40,6 +68,48 @@ function EditarModal({ pedido, onClose, onDone }) {
           <button onClick={onClose} className="text-white/70 hover:text-white">✕</button>
         </div>
         <div className="p-5 space-y-4">
+
+          {/* Acciones rápidas según estado actual */}
+          {pedido.estado === 'esperando_sena' && (
+            <div className="p-3 bg-amber-50 border border-amber-200 space-y-2">
+              <p className="text-xs font-black text-amber-800">Seña pendiente — {formatARS(pedido.montoSena)}</p>
+              <div className="flex gap-2 items-center">
+                <input type="text" value={referencia} onChange={e => setReferencia(e.target.value)}
+                  placeholder="Ref. de la transferencia (opcional)" className={inputCls} />
+                <Button size="sm" loading={actionLoading === 'sena'}
+                  onClick={() => runAction('sena', () => confirmarSena(pedido.id, referencia.trim() ? { referencia: referencia.trim() } : null))}>
+                  Confirmar seña →
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {(pedido.estado === 'sena_confirmada' || pedido.estado === 'confirmado_sin_pago') && (
+            <div className="p-3 bg-sky-50 border border-sky-200 space-y-2">
+              <p className="text-xs font-black text-sky-800">Notificar llegada a Buenos Aires</p>
+              <Button size="sm" loading={actionLoading === 'llegada'}
+                onClick={() => runAction('llegada', () => notificarLlegada(pedido.id))}>
+                Producto llegó a BsAs →
+              </Button>
+            </div>
+          )}
+
+          {(pedido.estado === 'esperando_saldo' || pedido.estado === 'esperando_pago') && (
+            <div className="p-3 bg-teal-50 border border-teal-200 space-y-2">
+              <p className="text-xs font-black text-teal-800">
+                {pedido.estado === 'esperando_saldo' ? `Saldo pendiente — ${formatARS(pedido.montoSaldo)}` : `Pago total pendiente — ${formatARS(pedido.costoTotalArs)}`}
+              </p>
+              <div className="flex gap-2 items-center">
+                <input type="text" value={referencia} onChange={e => setReferencia(e.target.value)}
+                  placeholder="Ref. de la transferencia (opcional)" className={inputCls} />
+                <Button size="sm" loading={actionLoading === 'saldo'}
+                  onClick={() => runAction('saldo', () => confirmarSaldo(pedido.id, referencia.trim() ? { referencia: referencia.trim() } : null))}>
+                  Confirmar pago →
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-hornet-dark mb-1">Estado</label>
             <select value={estado} onChange={e => setEstado(e.target.value)} className={inputCls}>
@@ -53,15 +123,18 @@ function EditarModal({ pedido, onClose, onDone }) {
             <input type="text" value={tracking} onChange={e => setTracking(e.target.value)}
               placeholder="Ej: UPS123456789" className={inputCls} />
           </div>
-          {(pedido.metodoPago === 'transferencia' || pedido.metodoPago === 'cripto') && (
+          {pedido.estado === 'en_proceso' && (pedido.metodoPago === 'transferencia' || pedido.metodoPago === 'cripto') && (
             <div>
               <label className="block text-sm font-medium text-hornet-dark mb-1">
-                Confirmar pago (referencia)
-                <span className="text-hornet-muted font-normal ml-1 text-xs">— solo si validaste el pago</span>
+                Confirmar pago único (referencia)
+                <span className="text-hornet-muted font-normal ml-1 text-xs">— legacy</span>
               </label>
               <input type="text" value={referencia} onChange={e => setReferencia(e.target.value)}
                 placeholder="N.° de transferencia o hash cripto" className={inputCls} />
             </div>
+          )}
+          {error && (
+            <p className="text-sm text-red-600 p-2 border border-red-200 bg-red-50">{error}</p>
           )}
           <div className="flex gap-3 pt-2">
             <Button variant="primary" loading={loading} onClick={handleGuardar} className="flex-1">

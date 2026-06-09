@@ -27,7 +27,8 @@ function FilterChips({ opciones, activo, onSelect }) {
 
 export default function MarketplacePage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const categoriaParam = searchParams.get('categoria') || ''
+  const categoriaParam    = searchParams.get('categoria') || ''
+  const subcategoriaParam = searchParams.get('subcategoria') || ''
 
   const { categorias } = useCategorias()
   const [listings, setListings] = useState([])
@@ -37,11 +38,15 @@ export default function MarketplacePage() {
   const [search, setSearch] = useState(searchParams.get('q') || '')
   const [searchActivo, setSearchActivo] = useState(searchParams.get('q') || '')
 
+  const categoriaActiva = categorias.find(c => c.id === categoriaParam)
+  const subcategorias   = categoriaActiva?.subcategorias?.filter(s => s.activo) ?? []
+
   useEffect(() => {
     setLoading(true)
     getListings({
-      categoria: categoriaParam || undefined,
-      search:    searchActivo   || undefined,
+      categoria:     categoriaParam    || undefined,
+      subcategoriaId: subcategoriaParam || undefined,
+      search:        searchActivo      || undefined,
       page,
       size: 24,
     })
@@ -50,7 +55,7 @@ export default function MarketplacePage() {
         setTotal(r.data.page?.totalElements ?? r.data.totalElements ?? r.data.length ?? 0)
       })
       .finally(() => setLoading(false))
-  }, [categoriaParam, searchActivo, page])
+  }, [categoriaParam, subcategoriaParam, searchActivo, page])
 
   const handleCategoria = (id) => {
     const p = new URLSearchParams()
@@ -60,11 +65,19 @@ export default function MarketplacePage() {
     setSearchParams(p)
   }
 
+  const handleSubcategoria = (id) => {
+    const p = new URLSearchParams(searchParams)
+    if (id) p.set('subcategoria', id); else p.delete('subcategoria')
+    setPage(0)
+    setSearchParams(p)
+  }
+
   const handleSearch = (e) => {
     e.preventDefault()
     const q = search.trim()
     const p = new URLSearchParams()
     if (categoriaParam) p.set('categoria', categoriaParam)
+    if (subcategoriaParam) p.set('subcategoria', subcategoriaParam)
     if (q) p.set('q', q)
     setSearchActivo(q)
     setPage(0)
@@ -78,12 +91,15 @@ export default function MarketplacePage() {
     setSearchParams(new URLSearchParams())
   }
 
-  const categoriaActiva = categorias.find(c => c.id === categoriaParam)
-  const hayFiltros = categoriaParam || searchActivo
+  const hayFiltros = categoriaParam || subcategoriaParam || searchActivo
 
   const opcionesCategorias = [
     { id: '', label: 'Todas las categorías' },
     ...categorias.map(c => ({ id: c.id, label: c.nombre })),
+  ]
+  const opcionesSubcategorias = [
+    { id: '', label: `Todo en ${categoriaActiva?.nombre ?? ''}` },
+    ...subcategorias.map(s => ({ id: s.id, label: s.nombre })),
   ]
 
   return (
@@ -118,15 +134,30 @@ export default function MarketplacePage() {
       </form>
 
       {/* Filtros */}
-      <div className="bg-hornet-surface border border-neutral-200 p-4 mb-6">
-        <p className="text-xs font-black text-hornet-muted uppercase tracking-widest mb-2">
-          Categoría
-        </p>
-        <FilterChips
-          opciones={opcionesCategorias}
-          activo={categoriaParam}
-          onSelect={handleCategoria}
-        />
+      <div className="bg-hornet-surface border border-neutral-200 p-4 mb-6 space-y-4">
+        <div>
+          <p className="text-xs font-black text-hornet-muted uppercase tracking-widest mb-2">
+            Categoría
+          </p>
+          <FilterChips
+            opciones={opcionesCategorias}
+            activo={categoriaParam}
+            onSelect={handleCategoria}
+          />
+        </div>
+
+        {subcategorias.length > 0 && (
+          <div className="pt-3 border-t border-neutral-200">
+            <p className="text-xs font-black text-hornet-muted uppercase tracking-widest mb-2">
+              Subcategoría — {categoriaActiva?.nombre}
+            </p>
+            <FilterChips
+              opciones={opcionesSubcategorias}
+              activo={subcategoriaParam}
+              onSelect={handleSubcategoria}
+            />
+          </div>
+        )}
       </div>
 
       {/* Barra de resultados */}

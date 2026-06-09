@@ -41,6 +41,7 @@ export default function TiendaPage() {
   const [page, setPage]           = useState(0)
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState(searchParams.get('q') || '')
+  const [searchActivo, setSearchActivo] = useState(searchParams.get('q') || '')
 
   const categoriaActiva = categorias.find(c => c.id === categoriaParam)
   const subcategorias   = categoriaActiva?.subcategorias?.filter(s => s.activo) ?? []
@@ -50,6 +51,7 @@ export default function TiendaPage() {
     getProductos({
       categoria:      categoriaParam    || undefined,
       subcategoriaId: subcategoriaParam || undefined,
+      search:         searchActivo      || undefined,
       page,
       size: 24,
     })
@@ -58,11 +60,12 @@ export default function TiendaPage() {
         setTotal(r.data.page?.totalElements ?? r.data.totalElements ?? r.data.length ?? 0)
       })
       .finally(() => setLoading(false))
-  }, [categoriaParam, subcategoriaParam, page])
+  }, [categoriaParam, subcategoriaParam, searchActivo, page])
 
   const setCategoria = (id) => {
     const p = new URLSearchParams()
     if (id) p.set('categoria', id)
+    if (searchActivo) p.set('q', searchActivo)
     setPage(0)
     setSearchParams(p)
   }
@@ -76,19 +79,24 @@ export default function TiendaPage() {
 
   const handleSearch = (e) => {
     e.preventDefault()
+    const q = search.trim()
     const p = new URLSearchParams()
-    if (search.trim()) p.set('q', search.trim())
+    if (categoriaParam) p.set('categoria', categoriaParam)
+    if (subcategoriaParam) p.set('subcategoria', subcategoriaParam)
+    if (q) p.set('q', q)
+    setSearchActivo(q)
     setPage(0)
     setSearchParams(p)
   }
 
   const limpiarFiltros = () => {
     setSearch('')
+    setSearchActivo('')
     setPage(0)
     setSearchParams(new URLSearchParams())
   }
 
-  const hayFiltros = categoriaParam || subcategoriaParam || searchParams.get('q')
+  const hayFiltros = categoriaParam || subcategoriaParam || searchActivo
 
   const opcionesCategorias = [
     { id: '', label: 'Todas las categorías' },
@@ -167,6 +175,9 @@ export default function TiendaPage() {
           {loading ? 'Cargando…' : `${total} producto${total !== 1 ? 's' : ''}`}
           {categoriaActiva && !loading && (
             <span className="ml-1">en <strong className="text-hornet-dark">{categoriaActiva.nombre}</strong></span>
+          )}
+          {searchActivo && !loading && (
+            <span className="ml-1">· búsqueda: <strong className="text-hornet-dark">"{searchActivo}"</strong></span>
           )}
         </p>
         {hayFiltros && !loading && (

@@ -10,7 +10,7 @@ import ImageUploader from '../../components/ui/ImageUploader'
 import { PageSpinner } from '../../components/ui/LoadingSpinner'
 
 const EMPTY_FORM = {
-  nombre: '', descripcion: '', categoria: '',
+  nombre: '', descripcion: '', categoria: '', subcategoriaId: '',
   precioUsd: '', stock: '0', imagenUrl: '',
 }
 
@@ -38,6 +38,7 @@ export default function ProductosPage() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [confirmarEliminar, setConfirmarEliminar] = useState(null)
 
   const cargar = () => {
     setLoading(true)
@@ -56,12 +57,13 @@ export default function ProductosPage() {
 
   const abrirEditar = (l) => {
     setForm({
-      nombre:      l.nombre      || '',
-      descripcion: l.descripcion || '',
-      categoria:   l.categoria   || '',
-      precioUsd:   l.precioUsd   || '',
-      stock:       l.stock != null ? String(l.stock) : '0',
-      imagenUrl:   l.imagenUrl   || '',
+      nombre:        l.nombre        || '',
+      descripcion:   l.descripcion   || '',
+      categoria:     l.categoria     || '',
+      subcategoriaId: l.subcategoriaId || '',
+      precioUsd:     l.precioUsd     || '',
+      stock:         l.stock != null ? String(l.stock) : '0',
+      imagenUrl:     l.imagenUrl     || '',
     })
     setError(null)
     setModal(l)
@@ -75,12 +77,13 @@ export default function ProductosPage() {
     setSaving(true)
     setError(null)
     const payload = {
-      nombre:      form.nombre.trim(),
-      descripcion: form.descripcion.trim() || null,
-      categoria:   form.categoria,
-      precioUsd:   Number(form.precioUsd),
-      stock:       Number(form.stock) || 0,
-      imagenUrl:   form.imagenUrl || null,
+      nombre:        form.nombre.trim(),
+      descripcion:   form.descripcion.trim() || null,
+      categoria:     form.categoria,
+      subcategoriaId: form.subcategoriaId || null,
+      precioUsd:     Number(form.precioUsd),
+      stock:         Number(form.stock) || 0,
+      imagenUrl:     form.imagenUrl || null,
     }
     try {
       if (modal === 'crear') {
@@ -103,8 +106,8 @@ export default function ProductosPage() {
   }
 
   const handleEliminar = async (id) => {
-    if (!confirm('¿Eliminar esta publicación?')) return
     await eliminarListing(id)
+    setConfirmarEliminar(null)
     cargar()
   }
 
@@ -149,7 +152,14 @@ export default function ProductosPage() {
                   {l.activo !== false ? 'Pausar' : 'Activar'}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => abrirEditar(l)}>Editar</Button>
-                <Button variant="danger" size="sm" onClick={() => handleEliminar(l.id)}>Eliminar</Button>
+                {confirmarEliminar === l.id ? (
+                  <div className="flex gap-1 items-center">
+                    <Button variant="danger" size="sm" onClick={() => handleEliminar(l.id)}>Sí, eliminar</Button>
+                    <Button variant="outline" size="sm" onClick={() => setConfirmarEliminar(null)}>No</Button>
+                  </div>
+                ) : (
+                  <Button variant="danger" size="sm" onClick={() => setConfirmarEliminar(l.id)}>Eliminar</Button>
+                )}
               </div>
             </div>
           ))}
@@ -177,11 +187,26 @@ export default function ProductosPage() {
 
             <div>
               <label className="block text-sm font-medium text-hornet-dark mb-1">Categoría *</label>
-              <select value={form.categoria} onChange={e => set('categoria', e.target.value)} className={inputCls}>
+              <select value={form.categoria}
+                onChange={e => { set('categoria', e.target.value); set('subcategoriaId', '') }}
+                className={inputCls}>
                 <option value="">Seleccioná...</option>
                 {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
               </select>
             </div>
+
+            {(() => {
+              const subcat = categorias.find(c => c.id === form.categoria)?.subcategorias?.filter(s => s.activo) ?? []
+              return subcat.length > 0 ? (
+                <div>
+                  <label className="block text-sm font-medium text-hornet-dark mb-1">Subcategoría</label>
+                  <select value={form.subcategoriaId} onChange={e => set('subcategoriaId', e.target.value)} className={inputCls}>
+                    <option value="">Sin subcategoría</option>
+                    {subcat.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+                  </select>
+                </div>
+              ) : null
+            })()}
 
             <div className="grid grid-cols-2 gap-3">
               <div>

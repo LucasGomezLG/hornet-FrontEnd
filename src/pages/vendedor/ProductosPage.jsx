@@ -4,7 +4,7 @@ import {
   toggleListing, eliminarListing, getFirmaImagen,
 } from '../../api/vendedor'
 import { formatARS, formatUSD } from '../../lib/utils'
-import { CATEGORIAS } from '../../lib/categorias'
+import { useCategorias } from '../../context/CategoriaContext'
 import Button from '../../components/ui/Button'
 import ImageUploader from '../../components/ui/ImageUploader'
 import { PageSpinner } from '../../components/ui/LoadingSpinner'
@@ -31,6 +31,7 @@ function Modal({ title, onClose, children }) {
 const inputCls = 'w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-hornet-gold bg-white'
 
 export default function ProductosPage() {
+  const { categorias } = useCategorias()
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(null) // null | 'crear' | listing
@@ -178,7 +179,7 @@ export default function ProductosPage() {
               <label className="block text-sm font-medium text-hornet-dark mb-1">Categoría *</label>
               <select value={form.categoria} onChange={e => set('categoria', e.target.value)} className={inputCls}>
                 <option value="">Seleccioná...</option>
-                {CATEGORIAS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
               </select>
             </div>
 

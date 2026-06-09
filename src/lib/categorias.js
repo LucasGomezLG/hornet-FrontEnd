@@ -1,4 +1,4 @@
-// Lista canónica de categorías — usada en CotizadorForm y filtros de tienda/marketplace
+// Lista estática — fallback mientras carga el contexto o para componentes sin acceso al context
 export const CATEGORIAS = [
   { id: 'autopartes',   label: 'Autopartes',   blacklist: false },
   { id: 'herramientas', label: 'Herramientas', blacklist: false },

@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { ToastProvider } from './context/ToastContext.jsx'
+import { CategoriaProvider } from './context/CategoriaContext.jsx'
 import MainLayout from './components/layout/MainLayout.jsx'
 import ProtectedRoute from './router/ProtectedRoute.jsx'
 import AdminRoute from './router/AdminRoute.jsx'
@@ -46,6 +47,7 @@ import PedidosAdminPage from './pages/admin/PedidosAdminPage.jsx'
 import VendedoresAdminPage from './pages/admin/VendedoresAdminPage.jsx'
 import TiendaAdminPage from './pages/admin/TiendaAdminPage.jsx'
 import SolicitudesAdminPage from './pages/admin/SolicitudesAdminPage.jsx'
+import CategoriasAdminPage from './pages/admin/CategoriasAdminPage.jsx'
 
 import NotFoundPage from './pages/NotFoundPage.jsx'
 
@@ -53,6 +55,7 @@ export default function App() {
   return (
     <ToastProvider>
     <AuthProvider>
+    <CategoriaProvider>
       <Routes>
         {/* Todas las rutas con Header + Footer */}
         <Route element={<MainLayout />}>
@@ -98,10 +101,12 @@ export default function App() {
           <Route path="/admin/vendedores" element={<AdminRoute><VendedoresAdminPage /></AdminRoute>} />
           <Route path="/admin/tienda" element={<AdminRoute><TiendaAdminPage /></AdminRoute>} />
           <Route path="/admin/solicitudes" element={<AdminRoute><SolicitudesAdminPage /></AdminRoute>} />
+          <Route path="/admin/categorias" element={<AdminRoute><CategoriasAdminPage /></AdminRoute>} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
+    </CategoriaProvider>
     </AuthProvider>
     </ToastProvider>
   )

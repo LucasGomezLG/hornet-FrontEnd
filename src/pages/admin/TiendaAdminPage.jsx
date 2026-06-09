@@ -4,13 +4,13 @@ import {
   toggleTiendaProducto, eliminarTiendaProducto, getFirmaImagenAdmin,
 } from '../../api/admin'
 import { formatARS, formatUSD } from '../../lib/utils'
-import { CATEGORIAS } from '../../lib/categorias'
+import { useCategorias } from '../../context/CategoriaContext'
 import Button from '../../components/ui/Button'
 import ImageUploader from '../../components/ui/ImageUploader'
 import { PageSpinner } from '../../components/ui/LoadingSpinner'
 
 const EMPTY_FORM = {
-  nombre: '', descripcion: '', categoria: '',
+  nombre: '', descripcion: '', categoria: '', subcategoriaId: '',
   precioUsd: '', stock: '0', destacado: false, imagenUrl: '',
 }
 
@@ -31,6 +31,7 @@ function Modal({ title, onClose, children }) {
 }
 
 export default function TiendaAdminPage() {
+  const { categorias } = useCategorias()
   const [productos, setProductos] = useState([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(null)
@@ -55,13 +56,14 @@ export default function TiendaAdminPage() {
 
   const abrirEditar = (p) => {
     setForm({
-      nombre:      p.nombre      || '',
-      descripcion: p.descripcion || '',
-      categoria:   p.categoria   || '',
-      precioUsd:   p.precioUsd   || '',
-      stock:       p.stock != null ? String(p.stock) : '0',
-      destacado:   p.destacado   || false,
-      imagenUrl:   p.imagenUrl   || '',
+      nombre:         p.nombre         || '',
+      descripcion:    p.descripcion    || '',
+      categoria:      p.categoria      || '',
+      subcategoriaId: p.subcategoriaId || '',
+      precioUsd:      p.precioUsd      || '',
+      stock:          p.stock != null ? String(p.stock) : '0',
+      destacado:      p.destacado      || false,
+      imagenUrl:      p.imagenUrl      || '',
     })
     setError(null)
     setModal(p)
@@ -75,13 +77,14 @@ export default function TiendaAdminPage() {
     setSaving(true)
     setError(null)
     const payload = {
-      nombre:      form.nombre.trim(),
-      descripcion: form.descripcion.trim() || null,
-      categoria:   form.categoria,
-      precioUsd:   Number(form.precioUsd),
-      stock:       Number(form.stock) || 0,
-      destacado:   form.destacado,
-      imagenUrl:   form.imagenUrl || null,
+      nombre:         form.nombre.trim(),
+      descripcion:    form.descripcion.trim() || null,
+      categoria:      form.categoria,
+      subcategoriaId: form.subcategoriaId || null,
+      precioUsd:      Number(form.precioUsd),
+      stock:          Number(form.stock) || 0,
+      destacado:      form.destacado,
+      imagenUrl:      form.imagenUrl || null,
     }
     try {
       if (modal === 'crear') {
@@ -198,11 +201,23 @@ export default function TiendaAdminPage() {
 
             <div>
               <label className="block text-sm font-medium text-hornet-dark mb-1">Categoría *</label>
-              <select value={form.categoria} onChange={e => set('categoria', e.target.value)} className={inputCls}>
+              <select value={form.categoria} onChange={e => { set('categoria', e.target.value); set('subcategoriaId', '') }} className={inputCls}>
                 <option value="">Seleccioná...</option>
-                {CATEGORIAS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
               </select>
             </div>
+
+            {form.categoria && (categorias.find(c => c.id === form.categoria)?.subcategorias ?? []).filter(s => s.activo).length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-hornet-dark mb-1">Subcategoría</label>
+                <select value={form.subcategoriaId} onChange={e => set('subcategoriaId', e.target.value)} className={inputCls}>
+                  <option value="">Sin subcategoría</option>
+                  {(categorias.find(c => c.id === form.categoria)?.subcategorias ?? [])
+                    .filter(s => s.activo)
+                    .map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+                </select>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <div>

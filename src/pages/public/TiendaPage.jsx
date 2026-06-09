@@ -1,37 +1,51 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { getProductos } from '../../api/tienda'
+import { useCategorias } from '../../context/CategoriaContext'
 import ProductCard from '../../components/tienda/ProductCard'
-import { CATEGORIAS } from '../../lib/categorias'
 import { ProductGridSkeleton } from '../../components/ui/Skeleton'
-
-const CATEGORIAS_TIENDA = CATEGORIAS.filter(c => !c.blacklist)
 
 export default function TiendaPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const categoriaParam = searchParams.get('categoria') || ''
-  const searchParam = searchParams.get('q') || ''
+  const categoriaParam    = searchParams.get('categoria') || ''
+  const subcategoriaParam = searchParams.get('subcategoria') || ''
+
+  const { categorias } = useCategorias()
 
   const [productos, setProductos] = useState([])
-  const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState(searchParam)
+  const [total, setTotal]         = useState(0)
+  const [page, setPage]           = useState(0)
+  const [loading, setLoading]     = useState(true)
+  const [search, setSearch]       = useState(searchParams.get('q') || '')
+
+  const categoriaActiva = categorias.find(c => c.id === categoriaParam)
+  const subcategorias   = categoriaActiva?.subcategorias?.filter(s => s.activo) ?? []
 
   useEffect(() => {
     setLoading(true)
-    getProductos({ categoria: categoriaParam || undefined, page, size: 24 })
+    getProductos({
+      categoria:      categoriaParam    || undefined,
+      subcategoriaId: subcategoriaParam || undefined,
+      page,
+      size: 24,
+    })
       .then(r => {
         setProductos(r.data.content ?? r.data)
         setTotal(r.data.page?.totalElements ?? r.data.totalElements ?? r.data.length ?? 0)
       })
       .finally(() => setLoading(false))
-  }, [categoriaParam, page])
+  }, [categoriaParam, subcategoriaParam, page])
 
-  const handleCategoria = (id) => {
+  const setCategoria = (id) => {
+    const p = new URLSearchParams()
+    if (id) p.set('categoria', id)
+    setPage(0)
+    setSearchParams(p)
+  }
+
+  const setSubcategoria = (id) => {
     const p = new URLSearchParams(searchParams)
-    if (id) p.set('categoria', id); else p.delete('categoria')
-    p.delete('q')
+    if (id) p.set('subcategoria', id); else p.delete('subcategoria')
     setPage(0)
     setSearchParams(p)
   }
@@ -65,18 +79,37 @@ export default function TiendaPage() {
         </button>
       </form>
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        <button onClick={() => handleCategoria('')}
+      {/* Filtro de categorías */}
+      <div className="flex flex-wrap gap-2 mb-2">
+        <button onClick={() => setCategoria('')}
           className={`px-3 py-1.5 text-xs border transition-colors ${!categoriaParam ? 'bg-hornet-dark text-white border-hornet-dark' : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-dark'}`}>
-          Todos
+          Todas
         </button>
-        {CATEGORIAS_TIENDA.map(c => (
-          <button key={c.id} onClick={() => handleCategoria(c.id)}
+        {categorias.map(c => (
+          <button key={c.id} onClick={() => setCategoria(c.id)}
             className={`px-3 py-1.5 text-xs border transition-colors ${categoriaParam === c.id ? 'bg-hornet-dark text-white border-hornet-dark' : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-dark'}`}>
-            {c.label}
+            {c.nombre}
           </button>
         ))}
       </div>
+
+      {/* Filtro de subcategorías (aparece si la categoría activa tiene subcategorías) */}
+      {subcategorias.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4 pl-2 border-l-2 border-hornet-gold">
+          <button onClick={() => setSubcategoria('')}
+            className={`px-2.5 py-1 text-xs border transition-colors ${!subcategoriaParam ? 'bg-hornet-gold text-hornet-dark border-hornet-gold' : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-gold'}`}>
+            Todas
+          </button>
+          {subcategorias.map(s => (
+            <button key={s.id} onClick={() => setSubcategoria(s.id)}
+              className={`px-2.5 py-1 text-xs border transition-colors ${subcategoriaParam === s.id ? 'bg-hornet-gold text-hornet-dark border-hornet-gold' : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-gold'}`}>
+              {s.nombre}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!subcategorias.length && <div className="mb-4" />}
 
       {loading ? (
         <ProductGridSkeleton count={24} />
@@ -92,14 +125,12 @@ export default function TiendaPage() {
           </div>
           {total > 24 && (
             <div className="flex justify-center gap-3 mt-8">
-              <button disabled={page === 0}
-                onClick={() => setPage(p => p - 1)}
+              <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
                 className="px-4 py-2 border border-neutral-300 text-sm disabled:opacity-40 hover:border-hornet-dark transition-colors">
                 Anterior
               </button>
               <span className="px-4 py-2 text-sm text-hornet-muted">Página {page + 1}</span>
-              <button disabled={(page + 1) * 24 >= total}
-                onClick={() => setPage(p => p + 1)}
+              <button disabled={(page + 1) * 24 >= total} onClick={() => setPage(p => p + 1)}
                 className="px-4 py-2 border border-neutral-300 text-sm disabled:opacity-40 hover:border-hornet-dark transition-colors">
                 Siguiente
               </button>

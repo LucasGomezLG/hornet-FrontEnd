@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { getListings } from '../../api/marketplace'
 import ListingCard from '../../components/marketplace/ListingCard'
-import { CATEGORIAS } from '../../lib/categorias'
+import { useCategorias } from '../../context/CategoriaContext'
 import { ProductGridSkeleton } from '../../components/ui/Skeleton'
 
 export default function MarketplacePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const categoriaParam = searchParams.get('categoria') || ''
 
+  const { categorias } = useCategorias()
   const [listings, setListings] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)
@@ -70,10 +71,10 @@ export default function MarketplacePage() {
           className={`px-3 py-1.5 text-xs border transition-colors ${!categoriaParam ? 'bg-hornet-dark text-white border-hornet-dark' : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-dark'}`}>
           Todos
         </button>
-        {CATEGORIAS.map(c => (
+        {categorias.map(c => (
           <button key={c.id} onClick={() => handleCategoria(c.id)}
             className={`px-3 py-1.5 text-xs border transition-colors ${categoriaParam === c.id ? 'bg-hornet-dark text-white border-hornet-dark' : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-dark'}`}>
-            {c.label}
+            {c.nombre}
           </button>
         ))}
       </div>

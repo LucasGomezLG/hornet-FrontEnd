@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '../../context/AuthContext'
 import { crearSolicitud } from '../../api/solicitudes'
+import { useCategorias } from '../../context/CategoriaContext'
 import Button from '../../components/ui/Button'
-import { CATEGORIAS } from '../../lib/categorias'
 
 const ORIGENES  = ['asia', 'europa', 'eeuu', 'otro']
 const ORIGEN_LABELS = { asia: 'Asia', europa: 'Europa', eeuu: 'EEUU', otro: 'Otro' }
@@ -20,7 +20,7 @@ const ITEM_VACÍO = {
   tipo: 'particular',
 }
 
-function ItemForm({ item, onChange, onRemove, index, total }) {
+function ItemForm({ item, onChange, onRemove, index, total, categorias }) {
   const set = (field, value) => onChange({ ...item, [field]: value })
 
   return (
@@ -99,8 +99,8 @@ function ItemForm({ item, onChange, onRemove, index, total }) {
             className="w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-hornet-gold bg-white"
           >
             <option value="">Seleccioná una categoría</option>
-            {CATEGORIAS.map(c => (
-              <option key={c.id} value={c.id}>{c.label}</option>
+            {categorias.map(c => (
+              <option key={c.id} value={c.id}>{c.nombre}</option>
             ))}
           </select>
         </div>
@@ -172,6 +172,7 @@ function ItemForm({ item, onChange, onRemove, index, total }) {
 export default function CotizarPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { categorias } = useCategorias()
   const [items, setItems] = useState([{ ...ITEM_VACÍO }])
   const [notaCliente, setNotaCliente] = useState('')
   const [loading, setLoading] = useState(false)
@@ -241,6 +242,7 @@ export default function CotizarPage() {
             index={idx}
             total={items.length}
             item={item}
+            categorias={categorias}
             onChange={updated => updateItem(idx, updated)}
             onRemove={() => removeItem(idx)}
           />

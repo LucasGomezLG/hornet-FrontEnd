@@ -43,6 +43,7 @@ export default function AdminOverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
           { label: 'Solicitudes',    desc: 'Cotizar solicitudes de importación de usuarios.', to: '/admin/solicitudes',  icon: '📋' },
+          { label: 'Categorías',    desc: 'Gestionar categorías y subcategorías de la tienda.', to: '/admin/categorias', icon: '🏷️' },
           { label: 'Cotizaciones',  desc: 'Aprobar o rechazar cotizaciones pendientes.',    to: '/admin/cotizaciones', icon: '🔢' },
           { label: 'Pedidos',       desc: 'Actualizar estado y tracking de pedidos.',        to: '/admin/pedidos',      icon: '📦' },
           { label: 'Vendedores',    desc: 'Ver vendedores habilitados en el marketplace.',   to: '/admin/vendedores',   icon: '🏪' },

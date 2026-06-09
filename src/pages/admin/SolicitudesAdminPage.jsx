@@ -64,11 +64,13 @@ function SugerenciaModal({ sugerencia, onClose, onAplicar }) {
 function ItemCotizador({ item, solicitudId, formState, onChange }) {
   const [loadingSugerencia, setLoadingSugerencia] = useState(false)
   const [sugerencia, setSugerencia] = useState(null)
+  const [errorSugerencia, setErrorSugerencia] = useState(null)
 
   const set = (field, value) => onChange({ ...formState, [field]: value })
 
   const verSugerencia = async () => {
     setLoadingSugerencia(true)
+    setErrorSugerencia(null)
     try {
       const params = {
         pesoKg:       item.pesoKg,
@@ -81,7 +83,7 @@ function ItemCotizador({ item, solicitudId, formState, onChange }) {
       const r = await getSugerencia(solicitudId, item.id, params)
       setSugerencia(r.data)
     } catch {
-      alert('No se pudo calcular sugerencia para este ítem.')
+      setErrorSugerencia('No se pudo calcular sugerencia para este ítem.')
     } finally {
       setLoadingSugerencia(false)
     }
@@ -113,17 +115,22 @@ function ItemCotizador({ item, solicitudId, formState, onChange }) {
             <p className="text-xs text-hornet-muted">Precio ref: {formatUSD(item.precioUsdRef)}</p>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <StatusChip tipo="item" estado={item.estadoItem} />
-          <Button
-            variant="outline"
-            size="sm"
-            loading={loadingSugerencia}
-            onClick={verSugerencia}
-            title="Calcular precio sugerido por el motor"
-          >
-            Sugerencia ✦
-          </Button>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <div className="flex items-center gap-2">
+            <StatusChip tipo="item" estado={item.estadoItem} />
+            <Button
+              variant="outline"
+              size="sm"
+              loading={loadingSugerencia}
+              onClick={verSugerencia}
+              title="Calcular precio sugerido por el motor"
+            >
+              Sugerencia ✦
+            </Button>
+          </div>
+          {errorSugerencia && (
+            <p className="text-xs text-red-600">{errorSugerencia}</p>
+          )}
         </div>
       </div>
 
@@ -232,6 +239,7 @@ function SolicitudDetalle({ solicitudId, onBack, onCotizada }) {
   const [solicitud, setSolicitud] = useState(null)
   const [loading, setLoading] = useState(true)
   const [guardando, setGuardando] = useState(false)
+  const [formError, setFormError] = useState(null)
   const [notaAdmin, setNotaAdmin] = useState('')
   const [itemForms, setItemForms] = useState({})
 
@@ -258,6 +266,7 @@ function SolicitudDetalle({ solicitudId, onBack, onCotizada }) {
   }, [solicitudId])
 
   const handleCotizar = async () => {
+    setFormError(null)
     const items = solicitud.items.map(item => {
       const f = itemForms[item.id]
       if (f.aprobado === null) return null
@@ -273,14 +282,14 @@ function SolicitudDetalle({ solicitudId, onBack, onCotizada }) {
     }).filter(Boolean)
 
     if (items.length === 0) {
-      alert('Definí la decisión (aprobar/rechazar) para al menos un ítem.')
+      setFormError('Definí la decisión (aprobar/rechazar) para al menos un ítem.')
       return
     }
 
     const aprobados = items.filter(i => i.aprobado)
     for (const i of aprobados) {
       if (!i.precioFinalUsd || !i.costoTotalArs) {
-        alert('Los ítems aprobados requieren precio USD y costo ARS.')
+        setFormError('Los ítems aprobados requieren precio USD y costo ARS.')
         return
       }
     }
@@ -289,8 +298,8 @@ function SolicitudDetalle({ solicitudId, onBack, onCotizada }) {
     try {
       await cotizarSolicitud(solicitudId, { items, notaAdmin: notaAdmin.trim() || null })
       onCotizada()
-    } catch (e) {
-      alert('Error al enviar la cotización. Revisá los campos e intentá de nuevo.')
+    } catch {
+      setFormError('Error al enviar la cotización. Revisá los campos e intentá de nuevo.')
     } finally {
       setGuardando(false)
     }
@@ -368,6 +377,11 @@ function SolicitudDetalle({ solicitudId, onBack, onCotizada }) {
               className="w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-hornet-gold resize-none"
             />
           </div>
+          {formError && (
+            <div className="p-3 border border-red-200 bg-red-50 text-sm text-red-700">
+              {formError}
+            </div>
+          )}
           <Button onClick={handleCotizar} loading={guardando} className="w-full">
             Enviar cotización al usuario →
           </Button>

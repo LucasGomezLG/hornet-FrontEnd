@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getPerfil, actualizarPerfil } from '../../api/perfil'
 import { formatFecha } from '../../lib/utils'
 import Button from '../../components/ui/Button'
@@ -13,6 +13,12 @@ const TIPO_LABELS = {
 }
 
 const inputCls = 'w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-hornet-gold bg-white'
+function validarCuit(cuit) {
+  if (!cuit) return null
+  if (/^\d{11}$/.test(cuit)) return null
+  if (/^\d{2}-\d{8}-\d$/.test(cuit)) return null
+  return 'Formato inválido. Usá: XX-XXXXXXXX-X o 11 dígitos'
+}
 
 export default function PerfilPage() {
   const [perfil, setPerfil] = useState(null)
@@ -22,6 +28,11 @@ export default function PerfilPage() {
   const [error, setError] = useState(null)
 
   const [form, setForm] = useState({ nombre: '', apellido: '', telefono: '', cuit: '' })
+  const savedTimerRef = useRef(null)
+
+  useEffect(() => {
+    return () => { if (savedTimerRef.current) clearTimeout(savedTimerRef.current) }
+  }, [])
 
   useEffect(() => {
     getPerfil()
@@ -41,6 +52,8 @@ export default function PerfilPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const cuitError = validarCuit(form.cuit)
+    if (cuitError) { setError(cuitError); return }
     setSaving(true)
     setSaved(false)
     setError(null)
@@ -53,7 +66,8 @@ export default function PerfilPage() {
       })
       setPerfil(r.data)
       setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+      savedTimerRef.current = setTimeout(() => setSaved(false), 3000)
     } catch {
       setError('Error al guardar. Intentá de nuevo.')
     } finally {
@@ -122,7 +136,11 @@ export default function PerfilPage() {
             </label>
             <input type="text" value={form.cuit} maxLength={13}
               onChange={e => set('cuit', e.target.value)}
-              placeholder="20-12345678-9" className={inputCls} />
+              placeholder="20-12345678-9"
+              className={`${inputCls} ${form.cuit && validarCuit(form.cuit) ? 'border-red-400 focus:ring-red-400' : ''}`} />
+            {form.cuit && validarCuit(form.cuit) && (
+              <p className="text-xs text-red-600 mt-1">{validarCuit(form.cuit)}</p>
+            )}
           </div>
         </div>
 

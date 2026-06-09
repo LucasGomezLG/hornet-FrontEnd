@@ -2,32 +2,32 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useAuth } from '../../hooks/useAuth'
 import { getPedidos } from '../../api/pedidos'
-import { getCotizaciones } from '../../api/cotizador'
-import { formatARS, formatFecha, ESTADO_PEDIDO_LABELS, ESTADO_COTIZACION_LABELS } from '../../lib/utils'
+import { getSolicitudes } from '../../api/solicitudes'
+import { formatFecha } from '../../lib/utils'
 import StatusChip from '../../components/ui/StatusChip'
 import { PageSpinner } from '../../components/ui/LoadingSpinner'
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const [pedidos, setPedidos] = useState([])
-  const [cotizaciones, setCotizaciones] = useState([])
+  const [solicitudes, setSolicitudes] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
       getPedidos({ page: 0, size: 5 }),
-      getCotizaciones({ page: 0, size: 5 }),
-    ]).then(([p, c]) => {
+      getSolicitudes({ page: 0, size: 5 }),
+    ]).then(([p, s]) => {
       setPedidos(p.data.content ?? [])
-      setCotizaciones(c.data.content ?? [])
-    }).finally(() => setLoading(false))
+      setSolicitudes(s.data.content ?? [])
+    }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   if (loading) return <PageSpinner />
 
-  const pedidosActivos = pedidos.filter(p => !['entregado', 'cancelado'].includes(p.estado)).length
-  const cotizacionesPendientes = cotizaciones.filter(c => c.estado === 'pendiente').length
-  const cotizacionesAprobadas = cotizaciones.filter(c => c.estado === 'aprobada').length
+  const pedidosActivos     = pedidos.filter(p => !['entregado', 'cancelado'].includes(p.estado)).length
+  const solicitudesPend    = solicitudes.filter(s => s.estado === 'pendiente').length
+  const solicitudesCotizadas = solicitudes.filter(s => s.estado === 'cotizada').length
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -41,10 +41,10 @@ export default function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
         {[
-          { label: 'Pedidos activos',        valor: pedidosActivos,           link: '/pedidos' },
-          { label: 'Cotiz. pendientes',      valor: cotizacionesPendientes,   link: '/cotizaciones' },
-          { label: 'Cotiz. aprobadas',       valor: cotizacionesAprobadas,    link: '/cotizaciones', highlight: cotizacionesAprobadas > 0 },
-          { label: 'Total cotizaciones',     valor: cotizaciones.length,      link: '/cotizaciones' },
+          { label: 'Pedidos activos',       valor: pedidosActivos,         link: '/pedidos' },
+          { label: 'Solicitudes en espera', valor: solicitudesPend,        link: '/cotizaciones' },
+          { label: 'Cotizaciones listas',   valor: solicitudesCotizadas,   link: '/cotizaciones', highlight: solicitudesCotizadas > 0 },
+          { label: 'Total solicitudes',     valor: solicitudes.length,     link: '/cotizaciones' },
         ].map(s => (
           <Link key={s.label} to={s.link}
             className={`border p-4 hover:border-hornet-gold transition-colors ${s.highlight ? 'border-hornet-gold bg-yellow-50' : 'border-neutral-200 bg-white'}`}>
@@ -54,18 +54,18 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Cotizaciones aprobadas — acción requerida */}
-      {cotizacionesAprobadas > 0 && (
+      {/* Banner — acción requerida */}
+      {solicitudesCotizadas > 0 && (
         <div className="mb-8 border border-hornet-gold bg-yellow-50 p-5">
           <p className="font-black text-hornet-dark mb-1">
-            ¡Tenés {cotizacionesAprobadas} cotización{cotizacionesAprobadas > 1 ? 'es' : ''} aprobada{cotizacionesAprobadas > 1 ? 's' : ''}!
+            ¡Tenés {solicitudesCotizadas} solicitud{solicitudesCotizadas > 1 ? 'es' : ''} cotizada{solicitudesCotizadas > 1 ? 's' : ''}!
           </p>
           <p className="text-sm text-hornet-muted mb-3">
-            El equipo revisó y aprobó tu cotización. Podés proceder al pago.
+            El equipo cotizó tus productos. Revisá los precios y confirmá antes de que expiren.
           </p>
           <Link to="/cotizaciones"
             className="inline-block bg-hornet-gold text-hornet-dark text-sm font-black px-4 py-2 hover:brightness-95 transition-all">
-            Ver cotizaciones →
+            Ver solicitudes →
           </Link>
         </div>
       )}
@@ -81,7 +81,7 @@ export default function DashboardPage() {
             <div className="border border-dashed border-neutral-300 p-6 text-center text-hornet-muted text-sm">
               <p>No tenés pedidos aún.</p>
               <Link to="/cotizar" className="font-black text-hornet-dark underline mt-2 inline-block">
-                Cotizar ahora →
+                Solicitar cotización →
               </Link>
             </div>
           ) : (
@@ -90,46 +90,46 @@ export default function DashboardPage() {
                 <div key={p.id} className="border border-neutral-200 p-3 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-hornet-dark truncate">{p.productoNombre}</p>
-                    <p className="text-xs text-hornet-muted">{p.id} · {formatFecha(p.createdAt)}</p>
+                    <p className="text-xs text-hornet-muted">{formatFecha(p.createdAt)}</p>
                   </div>
-                  <StatusChip type="pedido" estado={p.estado} />
+                  <StatusChip tipo="pedido" estado={p.estado} />
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Cotizaciones recientes */}
+        {/* Solicitudes recientes */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-black text-hornet-dark">Cotizaciones</h2>
+            <h2 className="font-black text-hornet-dark">Solicitudes</h2>
             <Link to="/cotizaciones" className="text-xs underline text-hornet-muted">Ver todas</Link>
           </div>
-          {cotizaciones.length === 0 ? (
+          {solicitudes.length === 0 ? (
             <div className="border border-dashed border-neutral-300 p-6 text-center text-hornet-muted text-sm">
-              <p>No tenés cotizaciones aún.</p>
+              <p>No tenés solicitudes aún.</p>
               <Link to="/cotizar" className="font-black text-hornet-dark underline mt-2 inline-block">
-                Cotizar ahora →
+                Solicitar cotización →
               </Link>
             </div>
           ) : (
             <div className="space-y-2">
-              {cotizaciones.map(c => (
-                <div key={c.id} className="border border-neutral-200 p-3 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-hornet-dark truncate">{c.nombreProducto}</p>
-                    <p className="text-xs text-hornet-muted">{formatFecha(c.createdAt)} · {formatARS(c.costoTotalArs)}</p>
+              {solicitudes.map(s => (
+                <Link key={s.id} to="/cotizaciones"
+                  className="block border border-neutral-200 p-3 hover:border-hornet-gold transition-colors">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-hornet-dark">
+                        {s.items?.length ?? 0} producto{(s.items?.length ?? 0) !== 1 ? 's' : ''}
+                      </p>
+                      <p className="text-xs text-hornet-muted">{formatFecha(s.createdAt)}</p>
+                    </div>
+                    <StatusChip tipo="solicitud" estado={s.estado} />
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <StatusChip type="cotizacion" estado={c.estado} />
-                    {c.estado === 'aprobada' && (
-                      <Link to={`/solicitar/${c.id}`}
-                        className="text-xs font-black text-hornet-gold underline whitespace-nowrap">
-                        Pagar →
-                      </Link>
-                    )}
-                  </div>
-                </div>
+                  {s.estado === 'cotizada' && (
+                    <p className="text-xs text-hornet-gold font-black mt-1">Acción requerida →</p>
+                  )}
+                </Link>
               ))}
             </div>
           )}
@@ -139,10 +139,10 @@ export default function DashboardPage() {
       {/* Accesos rápidos */}
       <div className="mt-10 border-t border-neutral-200 pt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Cotizar', to: '/cotizar', icon: '🔢' },
-          { label: 'Mis pedidos', to: '/pedidos', icon: '📦' },
-          { label: 'Seguimiento', to: '/seguimiento', icon: '📍' },
-          { label: 'Mi perfil', to: '/perfil', icon: '👤' },
+          { label: 'Nueva solicitud', to: '/cotizar',      icon: '📋' },
+          { label: 'Mis solicitudes', to: '/cotizaciones', icon: '🔢' },
+          { label: 'Mis pedidos',     to: '/pedidos',      icon: '📦' },
+          { label: 'Mi perfil',       to: '/perfil',       icon: '👤' },
         ].map(a => (
           <Link key={a.label} to={a.to}
             className="border border-neutral-200 p-4 text-center hover:border-hornet-gold transition-colors">

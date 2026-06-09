@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { ToastProvider } from './context/ToastContext.jsx'
 import { CategoriaProvider } from './context/CategoriaContext.jsx'
@@ -53,6 +54,7 @@ import NotFoundPage from './pages/NotFoundPage.jsx'
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <ToastProvider>
     <AuthProvider>
     <CategoriaProvider>
@@ -109,5 +111,6 @@ export default function App() {
     </CategoriaProvider>
     </AuthProvider>
     </ToastProvider>
+    </ErrorBoundary>
   )
 }

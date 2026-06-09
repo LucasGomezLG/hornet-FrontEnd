@@ -5,10 +5,83 @@ import { formatARS, formatUSD, formatFecha, ESTADO_PEDIDO_LABELS } from '../../l
 import StatusChip from '../../components/ui/StatusChip'
 import { PageSpinner } from '../../components/ui/LoadingSpinner'
 
-const PASOS = ['en_proceso', 'comprado', 'en_transito', 'en_aduana', 'entregado']
+// ── Barra de progreso unificada (5 etapas semánticas) ────────────────────────
+// Cubre los 3 flujos: legacy completo, nuevo completo (seña/saldo), forwarding
+const STAGE_LABELS = ['Iniciado', 'Comprado', 'En camino', 'Último paso', 'Entregado']
+
+function getStage(estado) {
+  if (estado === 'entregado') return 4
+  if (['esperando_saldo', 'saldo_confirmado', 'esperando_pago', 'pago_confirmado'].includes(estado)) return 3
+  if (['en_transito', 'en_aduana'].includes(estado)) return 2
+  if (['comprado', 'sena_confirmada', 'confirmado_sin_pago'].includes(estado)) return 1
+  return 0  // en_proceso, esperando_sena, estados desconocidos
+}
+
+function ProgressBar({ estado }) {
+  const stage = getStage(estado)
+  return (
+    <div className="px-4 pb-4">
+      <div className="flex items-center">
+        {STAGE_LABELS.map((label, i) => (
+          <div key={label} className="flex items-center flex-1 last:flex-none">
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs shrink-0
+              ${i <= stage ? 'bg-hornet-dark border-hornet-dark text-white' : 'bg-white border-neutral-300 text-hornet-muted'}`}>
+              {i < stage ? '✓' : ''}
+            </div>
+            {i < STAGE_LABELS.length - 1 && (
+              <div className={`flex-1 h-0.5 ${i < stage ? 'bg-hornet-dark' : 'bg-neutral-200'}`} />
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between mt-1">
+        {STAGE_LABELS.map(label => (
+          <span key={label} className="text-[10px] text-hornet-muted text-center flex-1">{label}</span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Banners de acción para estados que requieren pago del usuario
+function PagoPendienteBanner({ pedido }) {
+  if (pedido.estado === 'esperando_sena' && pedido.montoSena) {
+    return (
+      <div className="border-t border-amber-200 bg-amber-50 px-4 py-2 flex items-center justify-between gap-2">
+        <p className="text-xs text-amber-800">
+          Seña pendiente: <strong>{formatARS(pedido.montoSena)}</strong>
+        </p>
+        <Link to="/cotizaciones" className="text-xs font-black text-amber-800 underline whitespace-nowrap">
+          Ver instrucciones →
+        </Link>
+      </div>
+    )
+  }
+  if (pedido.estado === 'esperando_saldo' && pedido.montoSaldo) {
+    return (
+      <div className="border-t border-amber-200 bg-amber-50 px-4 py-2">
+        <p className="text-xs text-amber-800">
+          Tu producto llegó a Buenos Aires. Saldo pendiente: <strong>{formatARS(pedido.montoSaldo)}</strong>.
+          El equipo te contactará para coordinar el pago.
+        </p>
+      </div>
+    )
+  }
+  if (pedido.estado === 'esperando_pago' && pedido.costoTotalArs) {
+    return (
+      <div className="border-t border-amber-200 bg-amber-50 px-4 py-2">
+        <p className="text-xs text-amber-800">
+          Tu producto llegó a Buenos Aires. Pago pendiente: <strong>{formatARS(pedido.costoTotalArs)}</strong>.
+          El equipo te contactará para coordinar la entrega.
+        </p>
+      </div>
+    )
+  }
+  return null
+}
 
 function PedidoRow({ pedido }) {
-  const pasoActual = PASOS.indexOf(pedido.estado)
+  const estadoLabel = ESTADO_PEDIDO_LABELS[pedido.estado] || pedido.estado
   return (
     <div className="border border-neutral-200 bg-white">
       <div className="p-4 flex flex-wrap items-start justify-between gap-3">
@@ -24,31 +97,11 @@ function PedidoRow({ pedido }) {
         <StatusChip type="pedido" estado={pedido.estado} />
       </div>
 
-      {/* Barra de progreso */}
       {pedido.estado !== 'cancelado' && (
-        <div className="px-4 pb-4">
-          <div className="flex items-center">
-            {PASOS.map((paso, i) => (
-              <div key={paso} className="flex items-center flex-1 last:flex-none">
-                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs shrink-0
-                  ${i <= pasoActual ? 'bg-hornet-dark border-hornet-dark text-white' : 'bg-white border-neutral-300 text-hornet-muted'}`}>
-                  {i < pasoActual ? '✓' : ''}
-                </div>
-                {i < PASOS.length - 1 && (
-                  <div className={`flex-1 h-0.5 ${i < pasoActual ? 'bg-hornet-dark' : 'bg-neutral-200'}`} />
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-1">
-            {PASOS.map(paso => (
-              <span key={paso} className="text-[10px] text-hornet-muted text-center flex-1">
-                {ESTADO_PEDIDO_LABELS[paso]}
-              </span>
-            ))}
-          </div>
-        </div>
+        <ProgressBar estado={pedido.estado} />
       )}
+
+      <PagoPendienteBanner pedido={pedido} />
 
       {(pedido.trackingCode || pedido.trackingCodigoCliente) && (
         <div className="border-t border-neutral-100 px-4 py-2 text-xs text-hornet-muted">
@@ -75,6 +128,7 @@ export default function PedidosPage() {
         setPedidos(r.data.content ?? [])
         setTotal(r.data.page?.totalElements ?? r.data.totalElements ?? 0)
       })
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [page])
 
@@ -92,11 +146,11 @@ export default function PedidosPage() {
           <p className="text-4xl mb-3">📦</p>
           <p className="font-medium text-hornet-dark mb-1">No tenés pedidos aún.</p>
           <p className="text-sm text-hornet-muted mb-4">
-            Para crear un pedido primero cotizá y luego solicitá la importación.
+            Para crear un pedido, cotizá primero y confirmá los ítems.
           </p>
           <Link to="/cotizar"
             className="inline-block bg-hornet-gold text-hornet-dark text-sm font-black px-5 py-2">
-            Cotizar ahora →
+            Solicitar cotización →
           </Link>
         </div>
       ) : (

@@ -19,6 +19,7 @@ export default function AdminOverviewPage() {
     { label: 'Ingresos USD (este mes)',  valor: formatUSD(stats?.ingresosUsdMes),  to: '/admin/pedidos',       icon: '💰' },
     { label: 'Vendedores activos',       valor: stats?.vendedoresActivos ?? 0,     to: '/admin/vendedores',    icon: '🏪' },
     { label: 'Cotizaciones pendientes',  valor: stats?.cotizacionesPendientes ?? 0, to: '/admin/cotizaciones', icon: '⏳', highlight: (stats?.cotizacionesPendientes ?? 0) > 0 },
+    { label: 'Solicitudes pendientes',   valor: stats?.solicitudesPendientes ?? 0,  to: '/admin/solicitudes',  icon: '📋', highlight: (stats?.solicitudesPendientes ?? 0) > 0 },
   ]
 
   return (
@@ -41,6 +42,7 @@ export default function AdminOverviewPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
+          { label: 'Solicitudes',    desc: 'Cotizar solicitudes de importación de usuarios.', to: '/admin/solicitudes',  icon: '📋' },
           { label: 'Cotizaciones',  desc: 'Aprobar o rechazar cotizaciones pendientes.',    to: '/admin/cotizaciones', icon: '🔢' },
           { label: 'Pedidos',       desc: 'Actualizar estado y tracking de pedidos.',        to: '/admin/pedidos',      icon: '📦' },
           { label: 'Vendedores',    desc: 'Ver vendedores habilitados en el marketplace.',   to: '/admin/vendedores',   icon: '🏪' },

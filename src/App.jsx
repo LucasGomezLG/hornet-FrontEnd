@@ -45,6 +45,7 @@ import CotizacionesAdminPage from './pages/admin/CotizacionesAdminPage.jsx'
 import PedidosAdminPage from './pages/admin/PedidosAdminPage.jsx'
 import VendedoresAdminPage from './pages/admin/VendedoresAdminPage.jsx'
 import TiendaAdminPage from './pages/admin/TiendaAdminPage.jsx'
+import SolicitudesAdminPage from './pages/admin/SolicitudesAdminPage.jsx'
 
 import NotFoundPage from './pages/NotFoundPage.jsx'
 
@@ -96,6 +97,7 @@ export default function App() {
           <Route path="/admin/pedidos" element={<AdminRoute><PedidosAdminPage /></AdminRoute>} />
           <Route path="/admin/vendedores" element={<AdminRoute><VendedoresAdminPage /></AdminRoute>} />
           <Route path="/admin/tienda" element={<AdminRoute><TiendaAdminPage /></AdminRoute>} />
+          <Route path="/admin/solicitudes" element={<AdminRoute><SolicitudesAdminPage /></AdminRoute>} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Route>

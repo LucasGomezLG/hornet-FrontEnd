@@ -53,19 +53,49 @@ export function formatFechaHora(isoString) {
 
 // Labels en español para los estados de pedido
 export const ESTADO_PEDIDO_LABELS = {
-  en_proceso:  'En proceso',
-  comprado:    'Comprado',
-  en_transito: 'En tránsito',
-  en_aduana:   'En aduana',
-  entregado:   'Entregado',
-  cancelado:   'Cancelado',
+  // Legacy
+  en_proceso:           'En proceso',
+  comprado:             'Comprado',
+  // Nuevo completo
+  esperando_sena:       'Esperando seña',
+  sena_confirmada:      'Seña confirmada',
+  // Forwarding
+  confirmado_sin_pago:  'Confirmado',
+  // Logística compartida
+  en_transito:          'En tránsito',
+  en_aduana:            'En aduana',
+  // Pago final
+  esperando_saldo:      'Esperando saldo',
+  saldo_confirmado:     'Saldo confirmado',
+  esperando_pago:       'Esperando pago',
+  pago_confirmado:      'Pago confirmado',
+  // Finales
+  entregado:            'Entregado',
+  cancelado:            'Cancelado',
 }
 
-// Labels en español para los estados de cotización
+// Labels en español para los estados de cotización (legacy)
 export const ESTADO_COTIZACION_LABELS = {
   pendiente: 'Pendiente revisión',
   aprobada:  'Aprobada',
   rechazada: 'Rechazada',
   expirada:  'Expirada',
   procesada: 'Procesada',
+}
+
+// Labels para solicitudes (nuevo flujo)
+export const ESTADO_SOLICITUD_LABELS = {
+  pendiente:  'Pendiente revisión',
+  cotizada:   'Cotizada',
+  procesada:  'Procesada',
+  cancelada:  'Cancelada',
+  expirada:   'Expirada',
+}
+
+export const ESTADO_ITEM_LABELS = {
+  pendiente:   'Pendiente',
+  aprobado:    'Aprobado',
+  rechazado:   'Rechazado',
+  confirmado:  'Confirmado',
+  expirado:    'Expirado',
 }

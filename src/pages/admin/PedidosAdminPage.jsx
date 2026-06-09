@@ -16,7 +16,13 @@ const ESTADOS_PEDIDO = [
   'esperando_pago', 'pago_confirmado',
   'entregado', 'cancelado',
 ]
-const METODOS = ['', 'mp', 'transferencia', 'cripto']
+const METODOS = [
+  { value: '',              label: 'Todos los métodos' },
+  { value: 'mp',           label: 'Mercado Pago' },
+  { value: 'transferencia', label: 'Transferencia' },
+  { value: 'cripto',       label: 'Cripto (USDT)' },
+]
+const METODO_LABELS = { mp: 'Mercado Pago', transferencia: 'Transferencia', cripto: 'Cripto' }
 
 function EditarModal({ pedido, onClose, onDone }) {
   const [estado, setEstado] = useState(pedido.estado)
@@ -170,23 +176,49 @@ export default function PedidosAdminPage() {
         <h1 className="text-3xl font-black text-hornet-dark">Pedidos</h1>
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="flex gap-2 flex-wrap">
-          {ESTADOS_PEDIDO.map(e => (
-            <button key={e} onClick={() => setEstado(e)}
-              className={`px-3 py-1.5 text-xs border transition-colors ${estado === e ? 'bg-hornet-dark text-white border-hornet-dark' : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-dark'}`}>
-              {e ? (ESTADO_PEDIDO_LABELS[e] || e) : 'Todos'}
-            </button>
-          ))}
+      {/* Filtros */}
+      <div className="flex flex-wrap items-end gap-4 mb-6 p-4 bg-neutral-50 border border-neutral-200">
+        <div className="flex flex-col gap-1 min-w-[200px]">
+          <label className="text-xs font-medium text-hornet-muted uppercase tracking-wider">Estado</label>
+          <select
+            value={estado}
+            onChange={e => setEstado(e.target.value)}
+            className="border border-neutral-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-hornet-gold"
+          >
+            <option value="">Todos los estados</option>
+            {ESTADOS_PEDIDO.filter(Boolean).map(e => (
+              <option key={e} value={e}>{ESTADO_PEDIDO_LABELS[e] || e}</option>
+            ))}
+          </select>
         </div>
-        <div className="flex gap-2">
-          {METODOS.map(m => (
-            <button key={m} onClick={() => setMetodo(m)}
-              className={`px-3 py-1.5 text-xs border transition-colors ${metodo === m ? 'bg-hornet-dark text-white border-hornet-dark' : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-dark'}`}>
-              {m || 'Todos los métodos'}
-            </button>
-          ))}
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-hornet-muted uppercase tracking-wider">Método de pago</label>
+          <div className="flex gap-2">
+            {METODOS.map(m => (
+              <button
+                key={m.value}
+                onClick={() => setMetodo(m.value)}
+                className={`px-3 py-2 text-xs border transition-colors whitespace-nowrap ${
+                  metodo === m.value
+                    ? 'bg-hornet-dark text-white border-hornet-dark'
+                    : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-dark'
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {(estado || metodo) && (
+          <button
+            onClick={() => { setEstado(''); setMetodo('') }}
+            className="text-xs text-hornet-muted hover:text-hornet-dark underline pb-2 transition-colors"
+          >
+            Limpiar filtros
+          </button>
+        )}
       </div>
 
       {loading ? <PageSpinner /> : (
@@ -221,7 +253,7 @@ export default function PedidosAdminPage() {
                     <td className="px-3 py-3 text-xs text-hornet-muted">{p.userEmail}</td>
                     <td className="px-3 py-3 text-right font-black text-hornet-dark text-xs">{formatARS(p.costoTotalArs)}</td>
                     <td className="px-3 py-3 text-center"><StatusChip type="pedido" estado={p.estado} /></td>
-                    <td className="px-3 py-3 text-center text-xs text-hornet-muted">{p.metodoPago}</td>
+                    <td className="px-3 py-3 text-center text-xs text-hornet-muted">{METODO_LABELS[p.metodoPago] || p.metodoPago || '—'}</td>
                     <td className="px-3 py-3 text-xs font-mono text-hornet-muted">
                       {p.trackingCodigoCliente || p.trackingCode || '—'}
                     </td>

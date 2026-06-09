@@ -3,7 +3,7 @@ import {
   getSolicitudesAdmin, getSolicitudAdmin,
   cotizarSolicitud, getSugerencia
 } from '../../api/solicitudes'
-import { formatARS, formatUSD, formatFecha, formatFechaHora } from '../../lib/utils'
+import { formatARS, formatUSD, formatFecha, formatFechaHora, ESTADO_SOLICITUD_LABELS } from '../../lib/utils'
 import StatusChip from '../../components/ui/StatusChip'
 import Button from '../../components/ui/Button'
 import { PageSpinner } from '../../components/ui/LoadingSpinner'
@@ -443,7 +443,7 @@ export default function SolicitudesAdminPage() {
                   : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-dark'
               }`}
             >
-              {e || 'Todas'}
+              {e ? (ESTADO_SOLICITUD_LABELS[e] || e) : 'Todas'}
             </button>
           ))}
         </div>

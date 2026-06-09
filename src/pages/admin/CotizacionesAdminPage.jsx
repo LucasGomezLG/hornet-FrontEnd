@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getCotizacionesAdmin, aprobarCotizacion, rechazarCotizacion } from '../../api/admin'
-import { formatARS, formatUSD, formatFechaHora } from '../../lib/utils'
+import { formatARS, formatUSD, formatFechaHora, ESTADO_COTIZACION_LABELS } from '../../lib/utils'
 import StatusChip from '../../components/ui/StatusChip'
 import Button from '../../components/ui/Button'
 import { PageSpinner } from '../../components/ui/LoadingSpinner'
@@ -75,7 +75,7 @@ export default function CotizacionesAdminPage() {
           {ESTADOS.map(e => (
             <button key={e} onClick={() => setEstado(e)}
               className={`px-3 py-1.5 text-xs border transition-colors ${estado === e ? 'bg-hornet-dark text-white border-hornet-dark' : 'bg-white text-hornet-dark border-neutral-300 hover:border-hornet-dark'}`}>
-              {e || 'Todas'}
+              {e ? (ESTADO_COTIZACION_LABELS[e] || e) : 'Todas'}
             </button>
           ))}
         </div>
@@ -115,7 +115,7 @@ export default function CotizacionesAdminPage() {
                     <td className="px-4 py-3 text-right font-mono text-xs">{formatUSD(c.precioUsd)}</td>
                     <td className="px-4 py-3 text-right font-black text-hornet-dark">{formatARS(c.costoTotalArs)}</td>
                     <td className="px-4 py-3 text-center">
-                      <StatusChip type="cotizacion" estado={c.estado} />
+                      <StatusChip tipo="cotizacion" estado={c.estado} />
                     </td>
                     <td className="px-4 py-3 text-xs text-hornet-muted whitespace-nowrap">{formatFechaHora(c.createdAt)}</td>
                     <td className="px-4 py-3 text-center">

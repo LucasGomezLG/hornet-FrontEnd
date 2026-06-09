@@ -94,7 +94,7 @@ function PedidoRow({ pedido }) {
             <p className="text-sm text-hornet-dark mt-1">{formatARS(pedido.costoTotalArs)}</p>
           )}
         </div>
-        <StatusChip type="pedido" estado={pedido.estado} />
+        <StatusChip tipo="pedido" estado={pedido.estado} />
       </div>
 
       {pedido.estado !== 'cancelado' && (

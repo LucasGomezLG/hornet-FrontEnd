@@ -33,7 +33,6 @@ import PerfilPage from './pages/dashboard/PerfilPage.jsx'
 import CotizacionesPage from './pages/dashboard/CotizacionesPage.jsx'
 
 // Pago (requieren auth)
-import SolicitarPage from './pages/pago/SolicitarPage.jsx'
 import PagoExitosoPage from './pages/pago/PagoExitosoPage.jsx'
 import PagoPendientePage from './pages/pago/PagoPendientePage.jsx'
 import PagoFallidoPage from './pages/pago/PagoFallidoPage.jsx'
@@ -88,7 +87,6 @@ export default function App() {
           <Route path="/cotizaciones" element={<ProtectedRoute><CotizacionesPage /></ProtectedRoute>} />
 
           {/* Pago */}
-          <Route path="/solicitar/:cotizacionId" element={<ProtectedRoute><SolicitarPage /></ProtectedRoute>} />
           <Route path="/pago/exitoso" element={<ProtectedRoute><PagoExitosoPage /></ProtectedRoute>} />
           <Route path="/pago/pendiente" element={<ProtectedRoute><PagoPendientePage /></ProtectedRoute>} />
           <Route path="/pago/fallido" element={<ProtectedRoute><PagoFallidoPage /></ProtectedRoute>} />

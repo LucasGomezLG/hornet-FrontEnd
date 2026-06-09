@@ -98,15 +98,17 @@ function ItemRow({ item, solicitudId, onConfirmado }) {
   const [metodoPago, setMetodoPago] = useState('transferencia')
   const [loading, setLoading] = useState(false)
   const [pagoResponse, setPagoResponse] = useState(null)
+  const [confirmarError, setConfirmarError] = useState(null)
 
   const handleConfirmar = async () => {
     setLoading(true)
+    setConfirmarError(null)
     try {
       const res = await confirmarItem(solicitudId, item.id, { metodoPago })
       setPagoResponse(res.data)
       onConfirmado()
-    } catch (e) {
-      alert('Error al confirmar. Intentá de nuevo.')
+    } catch {
+      setConfirmarError('Error al confirmar. Intentá de nuevo.')
     } finally {
       setLoading(false)
     }
@@ -190,6 +192,9 @@ function ItemRow({ item, solicitudId, onConfirmado }) {
                 </div>
               )}
 
+              {confirmarError && (
+                <p className="text-xs text-red-600 text-center">{confirmarError}</p>
+              )}
               <Button
                 onClick={handleConfirmar}
                 loading={loading}

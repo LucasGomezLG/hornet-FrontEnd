@@ -81,13 +81,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Nota sobre cotizaciones pendientes */}
-          {destino.startsWith('/solicitar') && (
-            <div className="mt-4 p-4 bg-hornet-warning-bg border border-yellow-200 text-sm text-hornet-warning">
-              <strong>Nota:</strong> Tu cotización requiere aprobación del equipo antes de poder confirmar el pedido. Te notificamos por email cuando esté lista.
-            </div>
-          )}
-
         </div>
       </div>
     </GoogleOAuthProvider>

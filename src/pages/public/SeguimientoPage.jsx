@@ -58,7 +58,7 @@ export default function SeguimientoPage() {
         <div className="border border-neutral-200 bg-white">
           <div className="bg-hornet-dark text-white px-5 py-3 flex items-center justify-between">
             <p className="font-black text-sm uppercase tracking-widest">Pedido #{pedido.codigoSeguimiento}</p>
-            <StatusChip type="pedido" estado={pedido.estado} />
+            <StatusChip tipo="pedido" estado={pedido.estado} />
           </div>
 
           <div className="p-5">

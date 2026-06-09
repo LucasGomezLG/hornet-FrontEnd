@@ -252,7 +252,7 @@ export default function PedidosAdminPage() {
                     </td>
                     <td className="px-3 py-3 text-xs text-hornet-muted">{p.userEmail}</td>
                     <td className="px-3 py-3 text-right font-black text-hornet-dark text-xs">{formatARS(p.costoTotalArs)}</td>
-                    <td className="px-3 py-3 text-center"><StatusChip type="pedido" estado={p.estado} /></td>
+                    <td className="px-3 py-3 text-center"><StatusChip tipo="pedido" estado={p.estado} /></td>
                     <td className="px-3 py-3 text-center text-xs text-hornet-muted">{METODO_LABELS[p.metodoPago] || p.metodoPago || '—'}</td>
                     <td className="px-3 py-3 text-xs font-mono text-hornet-muted">
                       {p.trackingCodigoCliente || p.trackingCode || '—'}

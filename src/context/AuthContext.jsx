@@ -1,6 +1,10 @@
-import { createContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 export const AuthContext = createContext(null)
+
+export function useAuth() {
+  return useContext(AuthContext)
+}
 
 const API = import.meta.env.VITE_API_BASE_URL || ''
 
